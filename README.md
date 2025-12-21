@@ -190,7 +190,7 @@ Este projeto está sob a licença ISC.
 
 ## 👥 Autor
 
-[Seu Nome]
+Prof. Raimundo N. de Sousa (Raiworld)
 
 ## 📞 Suporte
 
