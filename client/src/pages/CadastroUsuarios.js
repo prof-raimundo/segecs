@@ -1,33 +1,51 @@
 import React, { useState, useEffect } from 'react';
+import { Link } from 'react-router-dom';
+import { FaEdit, FaTrash } from 'react-icons/fa'; // <--- CORREÇÃO 1: Importando ícones
 
 function CadastroUsuarios() {
   const [usuarios, setUsuarios] = useState([]);
-  const [niveis, setNiveis] = useState([]); // Para preencher o select
-  
-  // Dados do formulário
+  const [niveis, setNiveis] = useState([]); 
+
   const [formData, setFormData] = useState({
-    nome: '',
+    nome_completo: '', // Ajustei para bater com o banco (nome_completo)
     email: '',
     senha: '',
     id_nivel: ''
   });
 
-  // Carregar dados ao entrar na tela
   useEffect(() => {
     carregarUsuarios();
     carregarNiveis();
   }, []);
 
+  // Função auxiliar para pegar o token
+  const getToken = () => localStorage.getItem('token');
+
   const carregarUsuarios = async () => {
-    const res = await fetch('/api/usuarios');
-    const data = await res.json();
-    setUsuarios(data);
+    try {
+      const res = await fetch('/api/usuarios', { // Ajuste a rota se for /api/usuarios ou /api/users
+        headers: { 'Authorization': getToken() } // <--- Adicionado Token
+      });
+      const data = await res.json();
+      if (res.ok) setUsuarios(data);
+    } catch (error) {
+      console.error("Erro ao carregar usuários", error);
+    }
   };
 
   const carregarNiveis = async () => {
-    const res = await fetch('/api/niveis');
-    const data = await res.json();
-    setNiveis(data);
+    try {
+      // Se você ainda não tem rota de niveis, isso pode dar 404, mas não quebra a tela
+      const res = await fetch('/api/niveis', {
+        headers: { 'Authorization': getToken() }
+      }); 
+      if (res.ok) {
+        const data = await res.json();
+        setNiveis(data);
+      }
+    } catch (error) {
+      console.error("Erro niveis", error);
+    }
   };
 
   const handleChange = (e) => {
@@ -36,31 +54,44 @@ function CadastroUsuarios() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    
-    // Validação simples
     if (!formData.id_nivel) return alert("Selecione um nível de acesso!");
 
-    const response = await fetch('/api/usuarios', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(formData)
-    });
+    try {
+      const response = await fetch('/api/usuarios', { // Ajuste a rota se necessário
+        method: 'POST',
+        headers: { 
+          'Content-Type': 'application/json',
+          'Authorization': getToken()
+        },
+        body: JSON.stringify(formData)
+      });
 
-    if (response.ok) {
-      alert("Usuário criado com sucesso!");
-      setFormData({ nome: '', email: '', senha: '', id_nivel: '' }); // Limpa form
-      carregarUsuarios(); // Atualiza lista
-    } else {
-      const err = await response.json();
-      alert(err.error || "Erro ao criar usuário");
+      if (response.ok) {
+        alert("Usuário criado com sucesso!");
+        setFormData({ nome_completo: '', email: '', senha: '', id_nivel: '' }); 
+        carregarUsuarios(); 
+      } else {
+        const err = await response.json();
+        alert(err.error || "Erro ao criar usuário");
+      }
+    } catch (error) {
+      alert("Erro de conexão");
     }
   };
 
   const handleDelete = async (id) => {
     if (!window.confirm("Tem certeza que deseja excluir este usuário?")) return;
-    
-    const res = await fetch(`/api/usuarios/${id}`, { method: 'DELETE' });
-    if (res.ok) carregarUsuarios();
+
+    try {
+      const res = await fetch(`/api/usuarios/${id}`, { 
+        method: 'DELETE',
+        headers: { 'Authorization': getToken() }
+      });
+      if (res.ok) carregarUsuarios();
+      else alert("Erro ao excluir");
+    } catch (error) {
+      alert("Erro ao excluir");
+    }
   };
 
   return (
@@ -71,10 +102,10 @@ function CadastroUsuarios() {
       <div className="bg-white p-6 rounded-lg shadow-md mb-8">
         <h2 className="text-lg font-semibold mb-4 border-b pb-2">Novo Usuário</h2>
         <form onSubmit={handleSubmit} className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          
+
           <div>
             <label className="block text-sm font-medium text-gray-700">Nome Completo</label>
-            <input name="nome" value={formData.nome} onChange={handleChange} required className="w-full p-2 border rounded mt-1" />
+            <input name="nome_completo" value={formData.nome_completo} onChange={handleChange} required className="w-full p-2 border rounded mt-1" />
           </div>
 
           <div>
@@ -89,18 +120,26 @@ function CadastroUsuarios() {
 
           <div>
             <label className="block text-sm font-medium text-gray-700">Nível de Acesso</label>
-            <select 
-              name="id_nivel" 
-              value={formData.id_nivel} 
-              onChange={handleChange} 
-              required 
+            <select
+              name="id_nivel"
+              value={formData.id_nivel}
+              onChange={handleChange}
+              required
               className="w-full p-2 border rounded mt-1 bg-white"
             >
               <option value="">Selecione...</option>
-              {/* Aqui o React desenha as opções baseado no que veio do banco */}
-              {niveis.map(n => (
-                <option key={n.id_nivel} value={n.id_nivel}>{n.nivel}</option>
-              ))}
+              {/* Se não tiver niveis carregados, mostra opções fixas pra não travar */}
+              {niveis.length > 0 ? (
+                niveis.map(n => (
+                  <option key={n.id_nivel} value={n.id_nivel}>{n.nivel}</option>
+                ))
+              ) : (
+                <>
+                  <option value="1">Administrador</option>
+                  <option value="2">Orientador</option>
+                  <option value="3">Aluno</option>
+                </>
+              )}
             </select>
           </div>
 
@@ -125,19 +164,36 @@ function CadastroUsuarios() {
             </tr>
           </thead>
           <tbody>
-            {usuarios.map((u) => (
-              <tr key={u.id_usuario} className="border-b hover:bg-gray-50">
-                <td className="p-4">{u.nome_completo}</td>
-                <td className="p-4 text-gray-600">{u.email}</td>
+            {/* CORREÇÃO 2: Mudei (u) para (user) para bater com o código de baixo */}
+            {usuarios.map((user) => (
+              <tr key={user.id_usuario} className="border-b hover:bg-gray-50">
+                <td className="p-4">{user.nome_completo}</td>
+                <td className="p-4 text-gray-600">{user.email}</td>
                 <td className="p-4">
                   <span className="bg-blue-100 text-blue-800 text-xs font-semibold px-2 py-1 rounded">
-                    {u.nome_nivel}
+                    {/* Exibe o nome do nível ou o ID se o nome não vier */}
+                    {user.nome_nivel || user.id_nivel}
                   </span>
                 </td>
-                <td className="p-4 text-right">
-                  <button onClick={() => handleDelete(u.id_usuario)} className="text-red-500 hover:underline text-sm">
-                    Excluir
-                  </button>
+                <td className="py-3 px-6 text-center">
+                  <div className="flex item-center justify-end"> {/* Ajustei justify */}
+
+                    {/* Botão de Editar */}
+                    <Link 
+                      to={`/usuarios/editar/${user.id_usuario}`} 
+                      className="w-4 mr-4 transform hover:text-purple-500 hover:scale-110"
+                    >
+                      <FaEdit />
+                    </Link>
+
+                    {/* Botão de Excluir */}
+                    <div 
+                      onClick={() => handleDelete(user.id_usuario)}
+                      className="w-4 transform hover:text-red-500 hover:scale-110 cursor-pointer"
+                    >
+                      <FaTrash />
+                    </div>
+                  </div>
                 </td>
               </tr>
             ))}

@@ -1,8 +1,9 @@
 import React from 'react';
-import CadastroUsuarios from './pages/CadastroUsuarios';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 
 // Páginas
+import CadastroUsuarios from './pages/CadastroUsuarios';
+import EditarUsuario from './pages/EditarUsuario';
 import Login from './pages/Login';
 import CadastroAlunos from './pages/CadastroAlunos';
 import CadastroNiveis from './pages/CadastroNiveis';
@@ -17,23 +18,24 @@ function App() {
     <Router>
       <Routes>
         
-        {/* === ROTA PÚBLICA (Sem Sidebar) === */}
+        {/* === ROTA PÚBLICA === */}
         <Route path="/" element={<Login />} />
 
-
-        {/* === ROTAS PROTEGIDAS (Precisam de Login) === */}
+        {/* === ROTAS PROTEGIDAS (O PrivateRoute protege tudo aqui dentro) === */}
         <Route element={<PrivateRoute />}>
           
-          {/* === ROTAS COM LAYOUT (Precisam de Sidebar) === */}
-          {/* O Layout envolve as rotas abaixo. Se tirar daqui, o menu some. */}
+          {/* === ROTAS COM LAYOUT (Menu Lateral + Conteúdo) === */}
           <Route element={<Layout />}>
-             
-             {/* Aqui estão as páginas que aparecem DENTRO do Layout */}
-             <Route path="/dashboard" element={<Dashboard />} />
-             <Route path="/alunos" element={<CadastroAlunos />} />
-             <Route path="/niveis" element={<CadastroNiveis />} />
-             <Route path="/usuarios" element={<CadastroUsuarios />} />
-             
+              
+              <Route path="/dashboard" element={<Dashboard />} />
+              <Route path="/alunos" element={<CadastroAlunos />} />
+              <Route path="/niveis" element={<CadastroNiveis />} />
+              <Route path="/usuarios" element={<CadastroUsuarios />} />
+              
+              {/* --- AQUI: Movi a edição para dentro do Layout --- */}
+              {/* Não precisa repetir <PrivateRoute> pois o pai já protege */}
+              <Route path="/usuarios/editar/:id" element={<EditarUsuario />} />
+              
           </Route>
           {/* Fim do Layout */}
 

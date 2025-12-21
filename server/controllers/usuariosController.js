@@ -1,7 +1,7 @@
 const { query } = require('../config/db');
-const bcrypt = require('bcryptjs'); // Essencial para a senha!
+const bcrypt = require('bcryptjs'); 
 
-// Listar Usuários (com o nome do nível junto)
+// 1. Listar Usuários
 const getUsuarios = async (req, res) => {
   try {
     const sql = `
@@ -18,28 +18,33 @@ const getUsuarios = async (req, res) => {
   }
 };
 
-// Criar Usuário (Criptografando senha)
+// 2. Criar Usuário (CORRIGIDO: nome -> nome_completo)
 const createUsuario = async (req, res) => {
   try {
-    const { nome, email, senha, id_nivel } = req.body;
+    // AQUI ESTAVA O ERRO: O front manda nome_completo, não nome
+    const { nome_completo, email, senha, id_nivel } = req.body; 
 
-    // 1. Criptografa a senha
+    // Validação básica
+    if (!nome_completo || !email || !senha || !id_nivel) {
+        return res.status(400).json({ error: "Todos os campos são obrigatórios" });
+    }
+
+    // Criptografa a senha
     const salt = await bcrypt.genSalt(10);
     const hash = await bcrypt.hash(senha, salt);
 
-    // 2. Salva no banco
     const sql = `
       INSERT INTO sys_usuarios (nome_completo, email, senha_hash, id_nivel, ativo)
       VALUES ($1, $2, $3, $4, true)
       RETURNING id_usuario, nome_completo, email
     `;
     
-    const novo = await query(sql, [nome, email, hash, id_nivel]);
+    // Passamos nome_completo aqui
+    const novo = await query(sql, [nome_completo, email, hash, id_nivel]);
     res.json(novo.rows[0]);
 
   } catch (err) {
     console.error(err);
-    // Erro comum: Email duplicado
     if (err.code === '23505') {
       return res.status(400).json({ error: "Email já cadastrado." });
     }
@@ -47,7 +52,7 @@ const createUsuario = async (req, res) => {
   }
 };
 
-// Deletar Usuário
+// 3. Deletar Usuário
 const deleteUsuario = async (req, res) => {
   try {
     const { id } = req.params;
@@ -59,4 +64,54 @@ const deleteUsuario = async (req, res) => {
   }
 };
 
-module.exports = { getUsuarios, createUsuario, deleteUsuario };
+// 4. Buscar Usuário pelo ID (Para edição)
+const getUserById = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const result = await query('SELECT id_usuario, nome_completo, email, id_nivel, ativo FROM sys_usuarios WHERE id_usuario = $1', [id]);
+
+    if (result.rows.length === 0) {
+      return res.status(404).json({ error: "Usuário não encontrado" });
+    }
+
+    res.json(result.rows[0]);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: "Erro ao buscar usuário" });
+  }
+};
+
+// 5. Atualizar Usuário
+const updateUser = async (req, res) => {
+  const { id } = req.params;
+  const { nome_completo, email, senha, id_nivel, ativo } = req.body;
+
+  try {
+    if (senha && senha.trim() !== "") {
+      const salt = await bcrypt.genSalt(10);
+      const hash = await bcrypt.hash(senha, salt);
+      
+      await query(
+        `UPDATE sys_usuarios 
+         SET nome_completo=$1, email=$2, senha_hash=$3, id_nivel=$4, ativo=$5 
+         WHERE id_usuario=$6`,
+        [nome_completo, email, hash, id_nivel, ativo, id]
+      );
+    } else {
+      await query(
+        `UPDATE sys_usuarios 
+         SET nome_completo=$1, email=$2, id_nivel=$3, ativo=$4 
+         WHERE id_usuario=$5`,
+        [nome_completo, email, id_nivel, ativo, id]
+      );
+    }
+
+    res.json({ message: "Usuário atualizado com sucesso!" });
+
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: "Erro ao atualizar usuário" });
+  }
+};
+
+module.exports = { getUsuarios, createUsuario, deleteUsuario, getUserById, updateUser };
