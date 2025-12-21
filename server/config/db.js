@@ -1,14 +1,27 @@
 const { Pool } = require('pg');
 const dotenv = require('dotenv');
 
+// Carrega as variáveis do arquivo .env
 dotenv.config();
+
+// --- INÍCIO DO DIAGNÓSTICO (O ESPIÃO) ---
+console.log("==========================================");
+console.log("🔍 DIAGNÓSTICO DE CONEXÃO COM O BANCO");
+console.log("Arquivo .env carregado?");
+console.log("HOST:", process.env.DB_HOST || 'localhost (padrão)');
+console.log("USER:", process.env.DB_USER || 'postgres (padrão)');
+console.log("DB:", process.env.DB_NAME || 'segecs_db (padrão)');
+// A linha abaixo vai mostrar sua senha no terminal para conferirmos se há espaços extras ou erro
+console.log("SENHA LIDA:", process.env.DB_PASSWORD ? `'${process.env.DB_PASSWORD}'` : "❌ NENHUMA (UNDEFINED)");
+console.log("==========================================");
+// --- FIM DO DIAGNÓSTICO ---
 
 // Database connection pool
 const pool = new Pool({
   host: process.env.DB_HOST || 'localhost',
   port: process.env.DB_PORT || 5432,
   user: process.env.DB_USER || 'postgres',
-  password: process.env.DB_PASSWORD,
+  password: process.env.DB_PASSWORD, // Aqui é onde ele usa a senha
   database: process.env.DB_NAME || 'segecs_db',
   max: 20, // Maximum number of clients in the pool
   idleTimeoutMillis: 30000, // How long a client is allowed to remain idle
@@ -31,7 +44,7 @@ const query = async (text, params) => {
   try {
     const res = await pool.query(text, params);
     const duration = Date.now() - start;
-    console.log('Executed query', { text, duration, rows: res.rowCount });
+    // console.log('Executed query', { text, duration, rows: res.rowCount }); // Comentei para limpar o log
     return res;
   } catch (error) {
     console.error('Database query error', { text, error: error.message });
@@ -71,4 +84,3 @@ module.exports = {
   query,
   getClient,
 };
-

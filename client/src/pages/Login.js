@@ -11,7 +11,7 @@ function Login() {
 
   const handleLogin = async (e) => {
     e.preventDefault();
-    setError(''); // Limpa erros antigos
+    setError('');
 
     try {
       const response = await fetch('/api/auth/login', {
@@ -22,23 +22,18 @@ function Login() {
 
       const data = await response.json();
 
-      if (response.ok) {
-        // SUCESSO!
-        // 1. Salvar o Token no navegador (LocalStorage)
+      if (response.ok && data.token) {
+        // Sucesso!
         localStorage.setItem('token', data.token);
-        
-        // 2. Salvar dados do usuário (opcional, útil para mostrar "Olá, Admin")
-        localStorage.setItem('user', JSON.stringify(data.usuario));
-
-        // 3. Redirecionar para a página de Alunos
-        // navigate('/alunos');
+        localStorage.setItem('user', JSON.stringify(data.user));
         navigate('/dashboard');
       } else {
-        // ERRO (Senha errada, usuário não existe, etc)
-        setError(data.error || 'Erro ao fazer login');
+        // Falha: Mostra o erro que veio do servidor ou uma mensagem padrão
+        setError(data.error || 'Falha ao realizar login (Erro desconhecido)');
       }
     } catch (err) {
-      setError('Erro de conexão com o servidor.');
+      console.error(err);
+      setError('Erro de conexão. O servidor está rodando?');
     }
   };
 
