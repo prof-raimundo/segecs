@@ -1,11 +1,3 @@
-<<<<<<< HEAD
-# segecs
-Sistema Escolar de Gerenciamento de Estágio Curricular Supervisionado
-=======
-<<<<<<< HEAD
-# segecs
-Sistema Escolar de Gerenciamento de Estágio Curricular Supervisionado
-=======
 # SEGECS - Sistema Escolar de Gestão do Estágio Curricular Supervisionado
 
 Aplicação web desenvolvida com PERN Stack (PostgreSQL, Express, React, Node.js) para gestão de estágios curriculares supervisionados.
@@ -198,7 +190,7 @@ Este projeto está sob a licença ISC.
 
 ## 👥 Autor
 
-[Seu Nome]
+Prof. Raimundo N. de Sousa (Raiworld)
 
 ## 📞 Suporte
 
