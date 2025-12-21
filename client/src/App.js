@@ -1,4 +1,5 @@
 import React from 'react';
+import CadastroUsuarios from './pages/CadastroUsuarios';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 
 // Páginas
@@ -31,6 +32,7 @@ function App() {
              <Route path="/dashboard" element={<Dashboard />} />
              <Route path="/alunos" element={<CadastroAlunos />} />
              <Route path="/niveis" element={<CadastroNiveis />} />
+             <Route path="/usuarios" element={<CadastroUsuarios />} />
              
           </Route>
           {/* Fim do Layout */}

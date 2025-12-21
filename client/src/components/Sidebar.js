@@ -11,7 +11,6 @@ function Sidebar() {
     navigate('/');
   };
 
-  // Função para destacar o menu ativo (deixa amarelo na borda quando selecionado)
   const isActive = (path) => {
     return location.pathname === path 
       ? "bg-blue-800 border-r-4 border-yellow-400" 
@@ -29,17 +28,24 @@ function Sidebar() {
       {/* Navegação */}
       <nav className="flex-1 mt-6">
         
+        {/* DASHBOARD */}
         <Link to="/dashboard" className={`block p-4 transition-colors ${isActive('/dashboard')}`}>
-        📊 Dashboard
+          📊 Dashboard
         </Link>
-        {/* LINK 1: ALUNOS */}
+
+        {/* ALUNOS */}
         <Link to="/alunos" className={`block p-4 transition-colors ${isActive('/alunos')}`}>
           🎓 Alunos
         </Link>
 
-        {/* LINK 2: NÍVEIS (Este é o que faltava ou não aparecia) */}
+        {/* NÍVEIS DE ACESSO */}
         <Link to="/niveis" className={`block p-4 transition-colors ${isActive('/niveis')}`}>
           🔐 Níveis de Acesso
+        </Link>
+
+        {/* USUÁRIOS (NOVO) */}
+        <Link to="/usuarios" className={`block p-4 transition-colors ${isActive('/usuarios')}`}>
+          👥 Usuários
         </Link>
 
       </nav>

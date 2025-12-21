@@ -6,11 +6,12 @@ const cors = require('cors');
 // Nota: O dotenv já foi carregado na linha 1, não precisa carregar de novo
 const { query } = require('./config/db'); 
 
-// Importação das Rotas
+// ########## IMPORTAÇÃO DAS ROTAS ########## //
 const niveisRoutes = require('./routes/niveisRoutes');
 const alunosRoutes = require('./routes/alunosRoutes');
 const authRoutes = require('./routes/authRoutes');
 const dashboardRoutes = require('./routes/dashboardRoutes');
+const usuariosRoutes = require('./routes/usuariosRoutes');
 
 const app = express();
 const PORT = process.env.PORT || 5000;
@@ -52,10 +53,13 @@ app.get('/setup-admin', async (req, res) => {
 });
 
 // --- ROTAS DA API ---
+// ########## ATIVAR AS ROTAS ########## //
 app.use('/api/niveis', niveisRoutes);
 app.use('/api/alunos', alunosRoutes);
 app.use('/api/auth', authRoutes);
 app.use('/api/dashboard', dashboardRoutes);
+app.use('/api/usuarios', usuariosRoutes);
+
 
 // Test route
 app.get('/', (req, res) => {
