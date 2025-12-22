@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
+import { FaHome, FaUserGraduate, FaUsers, FaLayerGroup, FaCity,  FaSignOutAlt } from 'react-icons/fa';
 
 function Sidebar() {
   const navigate = useNavigate();
@@ -39,12 +40,12 @@ function Sidebar() {
       <nav className="flex-1 mt-6">
         
         {/* TODOS veem Dashboard e Alunos */}
-        <Link to="/dashboard" className={`block p-4 transition-colors ${isActive('/dashboard')}`}>
-          📊 Dashboard
+        <Link to="/dashboard" className={`flex items-center gap-4 px-6 py-3 hover:bg-blue-800 transition ${isActive('/dashboard')}`}>
+        <FaHome size={24}/> Dashboard
         </Link>
 
-        <Link to="/alunos" className={`block p-4 transition-colors ${isActive('/alunos')}`}>
-          🎓 Alunos
+        <Link to="/alunos" className={`flex items-center gap-4 px-6 py-3 hover:bg-blue-800 transition ${isActive('/alunos')}`}>
+        <FaUserGraduate size={24}/> Alunos
         </Link>
 
         {/* --- ÁREA RESTRITA (Só Nível 1 - Admin) --- */}
@@ -54,12 +55,15 @@ function Sidebar() {
               Administração
             </div>
 
-            <Link to="/niveis" className={`block p-4 transition-colors ${isActive('/niveis')}`}>
-              🔐 Níveis de Acesso
+            <Link to="/niveis" className={`flex items-center gap-4 px-6 py-3 hover:bg-blue-800 transition ${isActive('/niveis')}`}>
+            <FaLayerGroup size={24}/> Níveis de Acesso
             </Link>
 
-            <Link to="/usuarios" className={`block p-4 transition-colors ${isActive('/usuarios')}`}>
-              👥 Usuários
+            <Link to="/usuarios" className={`flex items-center gap-4 px-6 py-3 hover:bg-blue-800 transition ${isActive('/usuarios')}`}>
+              <FaUsers size={24}/> Usuários
+            </Link>
+            <Link to="/cidades" className={`flex items-center gap-4 px-6 py-3 hover:bg-blue-800 transition ${isActive('/cidades')}`}>
+              <FaCity size={24}/> Cidades
             </Link>
           </>
         )}

@@ -59,6 +59,7 @@ app.use('/api/alunos', alunosRoutes);
 app.use('/api/auth', authRoutes);
 app.use('/api/dashboard', dashboardRoutes);
 app.use('/api/usuarios', usuariosRoutes);
+app.use('/api/cidades', require('./routes/cidadesRoutes'));
 
 
 // Test route

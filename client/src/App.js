@@ -8,6 +8,7 @@ import Login from './pages/Login';
 import CadastroAlunos from './pages/CadastroAlunos';
 import CadastroNiveis from './pages/CadastroNiveis';
 import Dashboard from './pages/Dashboard';
+import CadastroCidades from './pages/CadastroCidades'; // NÃO SEI SE É ISSO
 
 // Componentes de Estrutura
 import PrivateRoute from './components/PrivateRoute';
@@ -31,6 +32,7 @@ function App() {
               <Route path="/alunos" element={<CadastroAlunos />} />
               <Route path="/niveis" element={<CadastroNiveis />} />
               <Route path="/usuarios" element={<CadastroUsuarios />} />
+              <Route path="/cidades" element={<CadastroCidades />} /> {/* NÃO SE É ISSO */}
               
               {/* --- AQUI: Movi a edição para dentro do Layout --- */}
               {/* Não precisa repetir <PrivateRoute> pois o pai já protege */}
