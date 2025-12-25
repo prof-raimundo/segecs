@@ -12,6 +12,7 @@ const alunosRoutes = require('./routes/alunosRoutes');
 const authRoutes = require('./routes/authRoutes');
 const dashboardRoutes = require('./routes/dashboardRoutes');
 const usuariosRoutes = require('./routes/usuariosRoutes');
+const cursosRoutes = require('./routes/cursosRoutes');
 
 const app = express();
 const PORT = process.env.PORT || 5000;
@@ -60,6 +61,7 @@ app.use('/api/auth', authRoutes);
 app.use('/api/dashboard', dashboardRoutes);
 app.use('/api/usuarios', usuariosRoutes);
 app.use('/api/cidades', require('./routes/cidadesRoutes'));
+app.use('/api/cursos', cursosRoutes);
 
 
 // Test route

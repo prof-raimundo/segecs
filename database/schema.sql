@@ -47,6 +47,17 @@ CREATE TABLE cad_cidades (
     dt_atualizacao TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
+-- Tabela de Cursos
+CREATE TABLE cad_cursos (
+    id_curso INTEGER NOT NULL GENERATED ALWAYS AS IDENTITY ( INCREMENT 1 START 1 MINVALUE 1 MAXVALUE 2147483647 CACHE 1 ),
+    nome_curso CHARACTER VARYING(100) COLLATE pg_catalog."default" NOT NULL,
+    eixo_curso CHARACTER VARYING(100) COLLATE pg_catalog."default" NOT NULL,
+    observacoes TEXT COLLATE pg_catalog."default",
+    dt_cadastro TIMESTAMP WITHOUT TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+    dt_atualizacao TIMESTAMP WITHOUT TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+    CONSTRAINT cad_cursos_pkey PRIMARY KEY (id_curso)
+);
+
 -- Tabela de Escolas
 CREATE TABLE cad_escolas (
     id_escola SERIAL PRIMARY KEY,

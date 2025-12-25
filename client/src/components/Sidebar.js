@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
-import { FaHome, FaUserGraduate, FaUsers, FaLayerGroup, FaCity,  FaSignOutAlt } from 'react-icons/fa';
+import { FaHome, FaUserGraduate, FaUsers, FaLayerGroup, FaCity, FaBook, FaSignOutAlt } from 'react-icons/fa';
 
 function Sidebar() {
   const navigate = useNavigate();
@@ -46,6 +46,10 @@ function Sidebar() {
 
         <Link to="/alunos" className={`flex items-center gap-4 px-6 py-3 hover:bg-blue-800 transition ${isActive('/alunos')}`}>
         <FaUserGraduate size={24}/> Alunos
+        </Link>
+
+        <Link to="/cursos" className={`flex items-center gap-4 px-6 py-3 hover:bg-blue-800 transition ${isActive('/cursos')}`}>
+        <FaBook size={24}/> Cursos
         </Link>
 
         {/* --- ÁREA RESTRITA (Só Nível 1 - Admin) --- */}
