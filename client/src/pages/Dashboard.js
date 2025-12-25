@@ -5,7 +5,10 @@ function Dashboard() {
 
   useEffect(() => {
     // Busca os números do servidor ao carregar a tela
-    fetch('/api/dashboard/stats')
+    const token = localStorage.getItem('token');
+    fetch('/api/dashboard/stats', {
+      headers: { 'Authorization': token }
+    })
       .then(res => res.json())
       .then(data => setStats(data))
       .catch(err => console.error(err));

@@ -1,32 +1,81 @@
 import React, { useState, useEffect } from 'react';
+import Modal from 'react-modal';
+import InputMask from 'react-input-mask';
+import { FaSave, FaTimes, FaEdit, FaTrash, FaUserGraduate } from 'react-icons/fa';
+
+Modal.setAppElement('#root');
 
 function CadastroAlunos() {
   const [alunos, setAlunos] = useState([]);
+  const [cidades, setCidades] = useState([]);
+  const [cursos, setCursos] = useState([]);
   const [editandoId, setEditandoId] = useState(null);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [modalMessage, setModalMessage] = useState('');
+  const [isSuccess, setIsSuccess] = useState(false);
 
-  // Estado com SEUS novos campos
+  // Estado com todos os campos
   const [formData, setFormData] = useState({
     matricula: '',
     nome: '',
+    rg: '',
     cpf: '',
     nasc: '',
-    email: '',
-    curso: '',
     telefone: '',
-    id_cidade: '1' // Fixo em 1 como no seu back-end
+    email: '',
+    id_cidade: '',
+    bairro: '',
+    zona: '',
+    id_curso: '',
+    turma: '',
+    observacoes: '',
+    inform_egressa: '',
+    facebook: '',
+    linkedin: '',
+    github: ''
   });
+
+  const getToken = () => localStorage.getItem('token');
 
   useEffect(() => {
     fetchAlunos();
+    fetchCidades();
+    fetchCursos();
   }, []);
 
   const fetchAlunos = async () => {
     try {
-      const res = await fetch('/api/alunos');
+      const res = await fetch('/api/alunos', {
+        headers: { 'Authorization': getToken() }
+      });
       const data = await res.json();
       setAlunos(data);
     } catch (error) {
       console.error("Erro ao buscar alunos", error);
+    }
+  };
+
+  const fetchCidades = async () => {
+    try {
+      const res = await fetch('/api/cidades', {
+        headers: { 'Authorization': getToken() }
+      });
+      const data = await res.json();
+      setCidades(data);
+    } catch (error) {
+      console.error("Erro ao buscar cidades", error);
+    }
+  };
+
+  const fetchCursos = async () => {
+    try {
+      const res = await fetch('/api/cursos', {
+        headers: { 'Authorization': getToken() }
+      });
+      const data = await res.json();
+      setCursos(data);
+    } catch (error) {
+      console.error("Erro ao buscar cursos", error);
     }
   };
 
@@ -38,21 +87,47 @@ function CadastroAlunos() {
   const handleEditClick = (aluno) => {
     setEditandoId(aluno.id_aluno);
     setFormData({
-      matricula: aluno.matricula,
-      nome: aluno.nome,
+      matricula: aluno.matricula || '',
+      nome: aluno.nome || '',
+      rg: aluno.rg || '',
       cpf: aluno.cpf || '',
-      // Formata data para yyyy-MM-dd
       nasc: aluno.nasc ? aluno.nasc.split('T')[0] : '',
-      email: aluno.email || '',
-      curso: aluno.curso || '',
       telefone: aluno.telefone || '',
-      id_cidade: aluno.id_cidade || '1'
+      email: aluno.email || '',
+      id_cidade: aluno.id_cidade || '',
+      bairro: aluno.bairro || '',
+      zona: aluno.zona || '',
+      id_curso: aluno.id_curso || '',
+      turma: aluno.turma || '',
+      observacoes: aluno.observacoes || '',
+      inform_egressa: aluno.inform_egressa || '',
+      facebook: aluno.facebook || '',
+      linkedin: aluno.linkedin || '',
+      github: aluno.github || ''
     });
   };
 
   const handleCancelEdit = () => {
     setEditandoId(null);
-    setFormData({ matricula: '', nome: '', cpf: '', nasc: '', email: '', curso: '', telefone: '', id_cidade: '1' });
+    setFormData({
+      matricula: '',
+      nome: '',
+      rg: '',
+      cpf: '',
+      nasc: '',
+      telefone: '',
+      email: '',
+      id_cidade: '',
+      bairro: '',
+      zona: '',
+      id_curso: '',
+      turma: '',
+      observacoes: '',
+      inform_egressa: '',
+      facebook: '',
+      linkedin: '',
+      github: ''
+    });
   };
 
   const handleSubmit = async (e) => {
@@ -72,24 +147,54 @@ function CadastroAlunos() {
         body: JSON.stringify(formData)
       });
 
+      const data = await response.json();
+
       if (response.ok) {
-        alert(editandoId ? "Aluno atualizado!" : "Aluno cadastrado!");
+        setModalMessage(editandoId ? "✅ Aluno atualizado com sucesso!" : "✅ Aluno cadastrado com sucesso!");
+        setIsSuccess(true);
+        setIsModalOpen(true);
         handleCancelEdit();
         fetchAlunos();
       } else {
-        const err = await response.json();
-        alert(err.error || "Erro ao salvar.");
+        setModalMessage(`❌ Erro: ${data.error || "Erro desconhecido"}`);
+        setIsSuccess(false);
+        setIsModalOpen(true);
       }
     } catch (error) {
-      console.error("Erro:", error);
+      setModalMessage('❌ Erro de conexão.');
+      setIsSuccess(false);
+      setIsModalOpen(true);
     }
   };
 
-  const handleDelete = async (id) => {
-    if (window.confirm("Tem certeza que deseja excluir?")) {
-      await fetch(`/api/alunos/${id}`, { method: 'DELETE' });
-      fetchAlunos();
+  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+  const [alunoToDelete, setAlunoToDelete] = useState(null);
+
+  const handleDeleteClick = (aluno) => {
+    setAlunoToDelete(aluno);
+    setIsDeleteModalOpen(true);
+  };
+
+  const confirmDelete = async () => {
+    if (alunoToDelete) {
+      try {
+        const response = await fetch(`/api/alunos/${alunoToDelete.id_aluno}`, { method: 'DELETE' });
+        if (response.ok) {
+          fetchAlunos();
+        } else {
+          alert("Erro ao excluir");
+        }
+      } catch (error) {
+        console.error(error);
+      }
     }
+    setIsDeleteModalOpen(false);
+    setAlunoToDelete(null);
+  };
+
+  const cancelDelete = () => {
+    setIsDeleteModalOpen(false);
+    setAlunoToDelete(null);
   };
 
   return (
@@ -98,36 +203,138 @@ function CadastroAlunos() {
 
       {/* Formulário Completo */}
       <div className="bg-white p-6 rounded-lg shadow-md mb-8 border-t-4 border-blue-600">
-        <h2 className="text-lg font-semibold mb-4 text-gray-700">
-          {editandoId ? "✏️ Editando Aluno" : "➕ Novo Aluno"}
+        <h2 className="text-lg font-semibold mb-4 text-gray-700 flex items-center gap-2">
+          {editandoId ? <><FaEdit /> Editando Aluno</> : <><FaUserGraduate /> Novo Aluno</>}
         </h2>
         
-        <form onSubmit={handleSubmit} className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-          
-          <input name="matricula" value={formData.matricula} onChange={handleChange} placeholder="Matrícula" className="p-2 border rounded" required />
+        <form onSubmit={handleSubmit} className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
           
           <div className="md:col-span-2">
-            <input name="nome" value={formData.nome} onChange={handleChange} placeholder="Nome Completo" className="w-full p-2 border rounded" required />
+            <label className="block text-sm font-medium text-gray-700">Nome Completo</label>
+            <input name="nome" value={formData.nome} onChange={handleChange} placeholder="Nome Completo" className="mt-1 w-full p-2 border rounded" required />
           </div>
 
-          <input name="cpf" value={formData.cpf} onChange={handleChange} placeholder="CPF" className="p-2 border rounded" />
+          <div>
+            <label className="block text-sm font-medium text-gray-700">Matrícula</label>
+            <input name="matricula" value={formData.matricula} onChange={handleChange} placeholder="Matrícula" className="mt-1 w-full p-2 border rounded" required />
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-gray-700">RG</label>
+            <input name="rg" value={formData.rg} onChange={handleChange} placeholder="RG" className="mt-1 w-full p-2 border rounded" />
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-gray-700">CPF</label>
+            <InputMask
+              mask="999.999.999-99"
+              name="cpf"
+              value={formData.cpf}
+              onChange={handleChange}
+              placeholder="000.000.000-00"
+              className="mt-1 w-full p-2 border rounded"
+              required
+            />
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-gray-700">Data Nascimento</label>
+            <input name="nasc" type="date" value={formData.nasc} onChange={handleChange} className="mt-1 w-full p-2 border rounded" required />
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-gray-700">Telefone</label>
+            <InputMask
+              mask="(99)99999-9999"
+              name="telefone"
+              value={formData.telefone}
+              onChange={handleChange}
+              placeholder="(00)00000-0000"
+              className="mt-1 w-full p-2 border rounded"
+            />
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-gray-700">Email</label>
+            <input name="email" type="email" value={formData.email} onChange={handleChange} placeholder="Email" className="mt-1 w-full p-2 border rounded" />
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-gray-700">Facebook</label>
+            <input name="facebook" type="url" value={formData.facebook} onChange={handleChange} placeholder="https://facebook.com/usuario" className="mt-1 w-full p-2 border rounded" />
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-gray-700">LinkedIn</label>
+            <input name="linkedin" type="url" value={formData.linkedin} onChange={handleChange} placeholder="https://linkedin.com/in/usuario" className="mt-1 w-full p-2 border rounded" />
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-gray-700">GitHub</label>
+            <input name="github" type="url" value={formData.github} onChange={handleChange} placeholder="https://github.com/usuario" className="mt-1 w-full p-2 border rounded" />
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-gray-700">Cidade</label>
+            <select name="id_cidade" value={formData.id_cidade} onChange={handleChange} className="mt-1 w-full p-2 border rounded" required>
+              <option value="">Selecione uma cidade</option>
+              {cidades.map(cidade => (
+                <option key={cidade.id_cidade} value={cidade.id_cidade}>
+                  {cidade.cidade} - {cidade.uf}
+                </option>
+              ))}
+            </select>
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-gray-700">Bairro</label>
+            <input name="bairro" value={formData.bairro} onChange={handleChange} placeholder="Bairro" className="mt-1 w-full p-2 border rounded" />
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-gray-700">Zona</label>
+            <select name="zona" value={formData.zona} onChange={handleChange} className="mt-1 w-full p-2 border rounded">
+              <option value="">Selecione</option>
+              <option value="Urbana">Urbana</option>
+              <option value="Rural">Rural</option>
+            </select>
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-gray-700">Curso</label>
+            <select name="id_curso" value={formData.id_curso} onChange={handleChange} className="mt-1 w-full p-2 border rounded">
+              <option value="">Selecione um curso</option>
+              {cursos.map(curso => (
+                <option key={curso.id_curso} value={curso.id_curso}>
+                  {curso.nome_curso}
+                </option>
+              ))}
+            </select>
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-gray-700">Turma</label>
+            <input name="turma" value={formData.turma} onChange={handleChange} placeholder="Turma" className="mt-1 w-full p-2 border rounded" />
+          </div>
+
+          <div className="md:col-span-3">
+            <label className="block text-sm font-medium text-gray-700">Observações</label>
+            <textarea name="observacoes" value={formData.observacoes} onChange={handleChange} placeholder="Observações" className="mt-1 w-full p-2 border rounded" rows="3" />
+          </div>
+
+          <div className="md:col-span-3">
+            <label className="block text-sm font-medium text-gray-700">Informações de Egressa</label>
+            <textarea name="inform_egressa" value={formData.inform_egressa} onChange={handleChange} placeholder="Informações de Egressa" className="mt-1 w-full p-2 border rounded" rows="3" />
+          </div>
           
-          <input name="nasc" type="date" value={formData.nasc} onChange={handleChange} className="p-2 border rounded" required />
-          
-          <input name="email" type="email" value={formData.email} onChange={handleChange} placeholder="Email" className="p-2 border rounded" />
-          
-          <input name="curso" value={formData.curso} onChange={handleChange} placeholder="Curso" className="p-2 border rounded" />
-          
-          <input name="telefone" value={formData.telefone} onChange={handleChange} placeholder="Telefone" className="p-2 border rounded" />
-          
-          <div className="md:col-span-4 flex gap-2 mt-4 justify-end">
+          <div className="md:col-span-3 flex gap-2 mt-4 justify-end">
             {editandoId && (
-              <button type="button" onClick={handleCancelEdit} className="bg-gray-400 text-white px-6 py-2 rounded hover:bg-gray-500">
-                Cancelar
+              <button type="button" onClick={handleCancelEdit} className="bg-gray-400 text-white px-6 py-2 rounded hover:bg-gray-500 flex items-center gap-2">
+                <FaTimes /> Cancelar
               </button>
             )}
-            <button type="submit" className={`text-white px-6 py-2 rounded font-bold ${editandoId ? 'bg-yellow-500 hover:bg-yellow-600' : 'bg-blue-600 hover:bg-blue-700'}`}>
-              {editandoId ? "Salvar Alterações" : "Cadastrar Aluno"}
+            <button type="submit" className={`text-white px-6 py-2 rounded font-bold flex items-center gap-2 ${editandoId ? 'bg-yellow-500 hover:bg-yellow-600' : 'bg-blue-600 hover:bg-blue-700'}`}>
+              <FaSave /> {editandoId ? "Salvar Alterações" : "Cadastrar Aluno"}
             </button>
           </div>
         </form>
@@ -140,6 +347,7 @@ function CadastroAlunos() {
             <tr>
               <th className="p-4">Matrícula</th>
               <th className="p-4">Nome</th>
+              <th className="p-4">CPF</th>
               <th className="p-4">Curso</th>
               <th className="p-4">Email</th>
               <th className="p-4 text-right">Ações</th>
@@ -150,14 +358,15 @@ function CadastroAlunos() {
               <tr key={aluno.id_aluno} className="border-b hover:bg-gray-50">
                 <td className="p-4 text-gray-600">{aluno.matricula}</td>
                 <td className="p-4 font-medium">{aluno.nome}</td>
-                <td className="p-4 text-gray-500">{aluno.curso}</td>
+                <td className="p-4 text-gray-500">{aluno.cpf}</td>
+                <td className="p-4 text-gray-500">{aluno.nome_curso}</td>
                 <td className="p-4 text-gray-500 text-sm">{aluno.email}</td>
                 <td className="p-4 text-right space-x-2">
                   <button onClick={() => handleEditClick(aluno)} className="text-blue-500 hover:text-blue-700 font-medium px-2">
-                    ✏️
+                    <FaEdit />
                   </button>
-                  <button onClick={() => handleDelete(aluno.id_aluno)} className="text-red-500 hover:text-red-700 font-medium px-2">
-                    🗑️
+                  <button onClick={() => handleDeleteClick(aluno)} className="text-red-500 hover:text-red-700 font-medium px-2">
+                    <FaTrash />
                   </button>
                 </td>
               </tr>
@@ -165,6 +374,74 @@ function CadastroAlunos() {
           </tbody>
         </table>
       </div>
+
+      <Modal
+        isOpen={isModalOpen}
+        onRequestClose={() => setIsModalOpen(false)}
+        className="modal"
+        overlayClassName="overlay"
+        contentLabel="Mensagem"
+      >
+        <div className="p-6 bg-white rounded-lg shadow-lg max-w-md mx-auto">
+          <h3 className="text-lg font-bold mb-4">{isSuccess ? 'Sucesso' : 'Erro'}</h3>
+          <p className="mb-4">{modalMessage}</p>
+          <button onClick={() => setIsModalOpen(false)} className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700">
+            OK
+          </button>
+        </div>
+      </Modal>
+
+      <Modal
+        isOpen={isDeleteModalOpen}
+        onRequestClose={cancelDelete}
+        className="modal"
+        overlayClassName="overlay"
+        contentLabel="Confirmar Exclusão"
+      >
+        <div className="p-6 bg-white rounded-lg shadow-lg max-w-md mx-auto">
+          <div className="flex items-center gap-3 mb-4">
+            <FaTrash className="text-red-500 text-2xl" />
+            <h3 className="text-lg font-bold text-gray-800">Confirmar Exclusão</h3>
+          </div>
+          <p className="mb-4 text-gray-600">
+            Tem certeza que deseja excluir o aluno <strong>{alunoToDelete?.nome}</strong>?
+            Esta ação não pode ser desfeita.
+          </p>
+          <div className="flex gap-3 justify-end">
+            <button onClick={cancelDelete} className="bg-gray-500 text-white px-4 py-2 rounded hover:bg-gray-600">
+              Cancelar
+            </button>
+            <button onClick={confirmDelete} className="bg-red-600 text-white px-4 py-2 rounded hover:bg-red-700">
+              Excluir
+            </button>
+          </div>
+        </div>
+      </Modal>
+
+      <style jsx>{`
+        .modal {
+          position: absolute;
+          top: 50%;
+          left: 50%;
+          transform: translate(-50%, -50%);
+          background: white;
+          padding: 0;
+          border-radius: 8px;
+          max-width: 500px;
+          width: 90%;
+        }
+        .overlay {
+          position: fixed;
+          top: 0;
+          left: 0;
+          right: 0;
+          bottom: 0;
+          background-color: rgba(0, 0, 0, 0.5);
+          display: flex;
+          align-items: center;
+          justify-content: center;
+        }
+      `}</style>
     </div>
   );
 }

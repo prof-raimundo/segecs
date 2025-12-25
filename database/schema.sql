@@ -84,13 +84,17 @@ CREATE TABLE cad_alunos (
     id_cidade INT NOT NULL,
     bairro VARCHAR(100),
     zona VARCHAR(20),
-    curso VARCHAR(100),
+    id_curso INT,
     turma VARCHAR(100),
     observacoes TEXT,
     inform_egressa TEXT,
+    facebook VARCHAR(255),
+    linkedin VARCHAR(255),
+    github VARCHAR(255),
     dt_cadastro TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     dt_atualizacao TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    FOREIGN KEY (id_cidade) REFERENCES cad_cidades(id_cidade)
+    FOREIGN KEY (id_cidade) REFERENCES cad_cidades(id_cidade),
+    FOREIGN KEY (id_curso) REFERENCES cad_cursos(id_curso)
 );
 
 -- Tabela de Responsáveis

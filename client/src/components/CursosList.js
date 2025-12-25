@@ -11,7 +11,12 @@ function CursosList({ refresh, onEditClick }) {
 
   const fetchCursos = async () => {
     try {
-      const response = await fetch('/api/cursos');
+      const token = localStorage.getItem('token');
+      const response = await fetch('/api/cursos', {
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
+      });
       const data = await response.json();
       setCursos(data);
     } catch (error) {
@@ -27,8 +32,12 @@ function CursosList({ refresh, onEditClick }) {
   const confirmDelete = async () => {
     if (cursoToDelete) {
       try {
+        const token = localStorage.getItem('token');
         const response = await fetch(`/api/cursos/${cursoToDelete.id_curso}`, {
-          method: "DELETE"
+          method: "DELETE",
+          headers: {
+            'Authorization': `Bearer ${token}`
+          }
         });
 
         if (response.ok) {

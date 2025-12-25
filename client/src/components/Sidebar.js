@@ -1,11 +1,11 @@
 import React, { useEffect, useState } from 'react';
-import { Link, useNavigate, useLocation } from 'react-router-dom';
-import { FaHome, FaUserGraduate, FaUsers, FaLayerGroup, FaCity, FaBook, FaSignOutAlt } from 'react-icons/fa';
+import { Link, useNavigate } from 'react-router-dom';
+import { FaHome, FaUserGraduate, FaUsers, FaLayerGroup, FaCity, FaBook } from 'react-icons/fa';
 
 function Sidebar() {
   const navigate = useNavigate();
-  const location = useLocation();
   const [user, setUser] = useState(null);
+  const [currentPath, setCurrentPath] = useState(window.location.pathname);
 
   // Ao carregar o menu, lemos quem é o usuário logado
   useEffect(() => {
@@ -13,6 +13,25 @@ function Sidebar() {
     if (userStorage) {
       setUser(JSON.parse(userStorage));
     }
+
+    // Escutar mudanças na URL
+    const handleLocationChange = () => {
+      setCurrentPath(window.location.pathname);
+    };
+
+    window.addEventListener('popstate', handleLocationChange);
+    
+    // Também escutar mudanças programáticas
+    const originalPushState = window.history.pushState;
+    window.history.pushState = function(...args) {
+      originalPushState.apply(this, args);
+      handleLocationChange();
+    };
+
+    return () => {
+      window.removeEventListener('popstate', handleLocationChange);
+      window.history.pushState = originalPushState;
+    };
   }, []);
 
   const handleLogout = () => {
@@ -22,19 +41,21 @@ function Sidebar() {
   };
 
   const isActive = (path) => {
-    return location.pathname === path 
+    return currentPath === path 
       ? "bg-blue-800 border-r-4 border-yellow-400" 
       : "hover:bg-blue-800";
   };
 
-  // Se ainda não carregou o usuário, não mostra nada para evitar "piscada"
-  if (!user) return null;
+  // Verificar se deve mostrar menu admin
+  const showAdminMenu = user && user.id_nivel === 1;
 
   return (
     <div className="w-64 bg-blue-900 min-h-screen text-white flex flex-col shadow-xl">
       <div className="p-6 text-center border-b border-blue-800">
         <h2 className="text-2xl font-bold">SEGECS</h2>
-        <p className="text-xs text-gray-400 mt-1">Olá, {user.nome.split(' ')[0]}</p>
+        <p className="text-xs text-gray-400 mt-1">
+          {user ? `Olá, ${user.nome.split(' ')[0]}` : 'Carregando...'}
+        </p>
       </div>
 
       <nav className="flex-1 mt-6">
@@ -53,7 +74,7 @@ function Sidebar() {
         </Link>
 
         {/* --- ÁREA RESTRITA (Só Nível 1 - Admin) --- */}
-        {user.id_nivel === 1 && (
+        {showAdminMenu && (
           <>
             <div className="pt-4 pb-2 px-4 text-xs text-gray-400 uppercase font-bold">
               Administração

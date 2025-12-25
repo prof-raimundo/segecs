@@ -4,10 +4,11 @@ import { Navigate, Outlet } from 'react-router-dom';
 const PrivateRoute = () => {
   // Tenta pegar o token salvo no navegador
   const token = localStorage.getItem('token');
+  const user = localStorage.getItem('user');
 
-  // Se tiver token, renderiza a página interna (Outlet).
+  // Se tiver token e user, renderiza a página interna (Outlet).
   // Se não tiver, chuta o usuário de volta para a raiz (Login).
-  return token ? <Outlet /> : <Navigate to="/" />;
+  return (token && user) ? <Outlet /> : <Navigate to="/" />;
 };
 
 export default PrivateRoute;

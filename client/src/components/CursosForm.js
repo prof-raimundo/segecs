@@ -24,7 +24,7 @@ function CursosForm({ onSuccess, cursoParaEditar, onCancel }) {
     } else {
       setFormData(initialData);
     }
-  }, [cursoParaEditar]);
+  }, [cursoParaEditar, initialData]);
 
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
@@ -37,15 +37,23 @@ function CursosForm({ onSuccess, cursoParaEditar, onCancel }) {
       let response;
 
       if (cursoParaEditar) {
+        const token = localStorage.getItem('token');
         response = await fetch(`/api/cursos/${cursoParaEditar.id_curso}`, {
           method: 'PUT',
-          headers: { 'Content-Type': 'application/json' },
+          headers: { 
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`
+          },
           body: JSON.stringify(formData)
         });
       } else {
+        const token = localStorage.getItem('token');
         response = await fetch('/api/cursos', {
           method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
+          headers: { 
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`
+          },
           body: JSON.stringify(formData)
         });
       }

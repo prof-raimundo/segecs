@@ -14,7 +14,12 @@ function CadastroCursos() {
 
   const fetchCursos = async () => {
     try {
-      const res = await fetch('/api/cursos');
+      const token = localStorage.getItem('token');
+      const res = await fetch('/api/cursos', {
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
+      });
       const data = await res.json();
       setCursos(data);
     } catch (error) {
