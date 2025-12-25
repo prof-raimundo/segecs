@@ -19,33 +19,21 @@ function App() {
   return (
     <Router>
       <Routes>
-        
         {/* === ROTA PÚBLICA === */}
         <Route path="/" element={<Login />} />
 
-        {/* === ROTAS PROTEGIDAS (O PrivateRoute protege tudo aqui dentro) === */}
+        {/* === ROTAS PROTEGIDAS === */}
         <Route element={<PrivateRoute />}>
-          
-          {/* === ROTAS COM LAYOUT (Menu Lateral + Conteúdo) === */}
           <Route element={<Layout />}>
-              
-              <Route path="/dashboard" element={<Dashboard />} />
-              <Route path="/alunos" element={<CadastroAlunos />} />
-              <Route path="/cursos" element={<CadastroCursos />} />
-              <Route path="/niveis" element={<CadastroNiveis />} />
-              <Route path="/usuarios" element={<CadastroUsuarios />} />
-              <Route path="/cidades" element={<CadastroCidades />} />
-              
-              {/* --- AQUI: Movi a edição para dentro do Layout --- */}
-              {/* Não precisa repetir <PrivateRoute> pois o pai já protege */}
-              <Route path="/usuarios/editar/:id" element={<EditarUsuario />} />
-              
+            <Route path="/dashboard" element={<Dashboard />} />
+            <Route path="/alunos" element={<CadastroAlunos />} />
+            <Route path="/cursos" element={<CadastroCursos />} />
+            <Route path="/niveis" element={<CadastroNiveis />} />
+            <Route path="/usuarios" element={<CadastroUsuarios />} />
+            <Route path="/cidades" element={<CadastroCidades />} />
+            <Route path="/usuarios/editar/:id" element={<EditarUsuario />} />
           </Route>
-          {/* Fim do Layout */}
-
         </Route>
-        {/* Fim do PrivateRoute */}
-
       </Routes>
     </Router>
   );

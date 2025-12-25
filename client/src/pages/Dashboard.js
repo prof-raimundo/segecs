@@ -4,7 +4,6 @@ function Dashboard() {
   const [stats, setStats] = useState({ totalAlunos: 0, totalNiveis: 0, totalUsuarios: 0 });
 
   useEffect(() => {
-    // Busca os números do servidor ao carregar a tela
     const token = localStorage.getItem('token');
     fetch('/api/dashboard/stats', {
       headers: { 'Authorization': token }

@@ -9,23 +9,14 @@ function CadastroCursos() {
   const [refresh, setRefresh] = useState(0);
 
   useEffect(() => {
-    fetchCursos();
+    const token = localStorage.getItem('token');
+    fetch('/api/cursos', {
+      headers: { 'Authorization': `Bearer ${token}` }
+    })
+      .then(res => res.json())
+      .then(data => setCursos(data))
+      .catch(error => console.error("Erro ao buscar cursos", error));
   }, []);
-
-  const fetchCursos = async () => {
-    try {
-      const token = localStorage.getItem('token');
-      const res = await fetch('/api/cursos', {
-        headers: {
-          'Authorization': `Bearer ${token}`
-        }
-      });
-      const data = await res.json();
-      setCursos(data);
-    } catch (error) {
-      console.error("Erro ao buscar cursos", error);
-    }
-  };
 
   const handleEditClick = (curso) => {
     setEditandoId(curso.id_curso);

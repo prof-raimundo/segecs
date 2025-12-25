@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useLocation } from 'react-router-dom';
 import { FaTrash, FaEdit, FaTimes } from 'react-icons/fa'; // Ícones para ficar bonito
 
 function CadastroNiveis() {
@@ -13,24 +14,25 @@ function CadastroNiveis() {
   // Estado para controlar Edição (null = criando, número = editando ID tal)
   const [editandoId, setEditandoId] = useState(null);
 
+  const location = useLocation();
   const getToken = () => localStorage.getItem('token');
 
   // Carregar dados
-  const fetchNiveis = async () => {
-    try {
-      const response = await fetch('/api/niveis', {
-        headers: { 'Authorization': getToken() }
-      });
-      const data = await response.json();
-      setNiveis(data);
-    } catch (error) {
-      console.error("Erro ao buscar níveis", error);
-    }
-  };
-
   useEffect(() => {
+    const fetchNiveis = async () => {
+      try {
+        const response = await fetch('/api/niveis', {
+          headers: { 'Authorization': getToken() }
+        });
+        const data = await response.json();
+        setNiveis(data);
+      } catch (error) {
+        console.error("Erro ao buscar níveis", error);
+      }
+    };
+
     fetchNiveis();
-  }, []);
+  }, [location.pathname]);
 
   // --- FUNÇÕES DE AÇÃO ---
 

@@ -1,38 +1,22 @@
 import React, { useEffect, useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { FaHome, FaUserGraduate, FaUsers, FaLayerGroup, FaCity, FaBook } from 'react-icons/fa';
 
 function Sidebar() {
   const navigate = useNavigate();
   const [user, setUser] = useState(null);
-  const [currentPath, setCurrentPath] = useState(window.location.pathname);
+  const location = useLocation();
+  const currentPath = location.pathname;
 
-  // Ao carregar o menu, lemos quem é o usuário logado
+  // Carregar usuário ao montar E quando a rota muda
   useEffect(() => {
     const userStorage = localStorage.getItem('user');
     if (userStorage) {
       setUser(JSON.parse(userStorage));
+    } else {
+      setUser(null);
     }
-
-    // Escutar mudanças na URL
-    const handleLocationChange = () => {
-      setCurrentPath(window.location.pathname);
-    };
-
-    window.addEventListener('popstate', handleLocationChange);
-    
-    // Também escutar mudanças programáticas
-    const originalPushState = window.history.pushState;
-    window.history.pushState = function(...args) {
-      originalPushState.apply(this, args);
-      handleLocationChange();
-    };
-
-    return () => {
-      window.removeEventListener('popstate', handleLocationChange);
-      window.history.pushState = originalPushState;
-    };
-  }, []);
+  }, [location.pathname]);  // Recarrega quando muda de rota
 
   const handleLogout = () => {
     localStorage.removeItem('token');

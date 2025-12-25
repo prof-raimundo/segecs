@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import Sidebar from '../components/Sidebar'; // Se estiver usando Sidebar global no Layout, pode remover daqui
+import { useLocation } from 'react-router-dom';
 import { FaTrash, FaEdit, FaTimes, FaMapMarkerAlt } from 'react-icons/fa';
 
 const LISTA_UFS = [
@@ -8,6 +8,7 @@ const LISTA_UFS = [
 ];
 
 function CadastroCidades() {
+  const location = useLocation();
   const [cidades, setCidades] = useState([]);
   const [formData, setFormData] = useState({ cidade: '', uf: '', observacoes: '' });
   const [editandoId, setEditandoId] = useState(null);
@@ -22,19 +23,19 @@ function CadastroCidades() {
     });
   };
 
-  const carregarCidades = async () => {
-    try {
-      const res = await fetch('/api/cidades', { headers: { 'Authorization': getToken() } });
-      const data = await res.json();
-      setCidades(data);
-    } catch (error) {
-      console.error("Erro ao carregar cidades", error);
-    }
-  };
-
   useEffect(() => {
+    const carregarCidades = async () => {
+      try {
+        const res = await fetch('/api/cidades', { headers: { 'Authorization': getToken() } });
+        const data = await res.json();
+        setCidades(data);
+      } catch (error) {
+        console.error("Erro ao carregar cidades", error);
+      }
+    };
+
     carregarCidades();
-  }, []);
+  }, [location.pathname]);
 
   const iniciarEdicao = (c) => {
     setFormData({ 

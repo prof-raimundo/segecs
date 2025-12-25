@@ -1,30 +1,20 @@
 import React, { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useLocation } from 'react-router-dom';
 import { FaEdit, FaTrash } from 'react-icons/fa'; // <--- CORREÇÃO 1: Importando ícones
 
 function CadastroUsuarios() {
   const [usuarios, setUsuarios] = useState([]);
-  const [niveis, setNiveis] = useState([]); 
-
-  const [formData, setFormData] = useState({
-    nome_completo: '', // Ajustei para bater com o banco (nome_completo)
-    email: '',
-    senha: '',
-    id_nivel: ''
-  });
-
-  useEffect(() => {
-    carregarUsuarios();
-    carregarNiveis();
-  }, []);
+  const [niveis, setNiveis] = useState([]);
+  const location = useLocation();
 
   // Função auxiliar para pegar o token
   const getToken = () => localStorage.getItem('token');
 
+  // Função para carregar usuários
   const carregarUsuarios = async () => {
     try {
-      const res = await fetch('/api/usuarios', { // Ajuste a rota se for /api/usuarios ou /api/users
-        headers: { 'Authorization': getToken() } // <--- Adicionado Token
+      const res = await fetch('/api/usuarios', {
+        headers: { 'Authorization': getToken() }
       });
       const data = await res.json();
       if (res.ok) setUsuarios(data);
@@ -33,12 +23,12 @@ function CadastroUsuarios() {
     }
   };
 
+  // Função para carregar níveis
   const carregarNiveis = async () => {
     try {
-      // Se você ainda não tem rota de niveis, isso pode dar 404, mas não quebra a tela
       const res = await fetch('/api/niveis', {
         headers: { 'Authorization': getToken() }
-      }); 
+      });
       if (res.ok) {
         const data = await res.json();
         setNiveis(data);
@@ -47,6 +37,18 @@ function CadastroUsuarios() {
       console.error("Erro niveis", error);
     }
   };
+
+  const [formData, setFormData] = useState({
+    nome_completo: '',
+    email: '',
+    senha: '',
+    id_nivel: ''
+  });
+
+  useEffect(() => {
+    carregarUsuarios();
+    carregarNiveis();
+  }, [location.pathname]);
 
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });

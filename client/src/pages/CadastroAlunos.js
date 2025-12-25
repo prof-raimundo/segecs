@@ -38,46 +38,31 @@ function CadastroAlunos() {
   const getToken = () => localStorage.getItem('token');
 
   useEffect(() => {
-    fetchAlunos();
-    fetchCidades();
-    fetchCursos();
+    // Função para buscar todos os dados
+    const loadData = async () => {
+      try {
+        const [alunosRes, cidadesRes, cursosRes] = await Promise.all([
+          fetch('/api/alunos', { headers: { 'Authorization': getToken() } }),
+          fetch('/api/cidades', { headers: { 'Authorization': getToken() } }),
+          fetch('/api/cursos', { headers: { 'Authorization': getToken() } })
+        ]);
+        
+        const [alunosData, cidadesData, cursosData] = await Promise.all([
+          alunosRes.json(),
+          cidadesRes.json(),
+          cursosRes.json()
+        ]);
+        
+        setAlunos(alunosData);
+        setCidades(cidadesData);
+        setCursos(cursosData);
+      } catch (error) {
+        console.error("Erro ao buscar dados:", error);
+      }
+    };
+
+    loadData();
   }, []);
-
-  const fetchAlunos = async () => {
-    try {
-      const res = await fetch('/api/alunos', {
-        headers: { 'Authorization': getToken() }
-      });
-      const data = await res.json();
-      setAlunos(data);
-    } catch (error) {
-      console.error("Erro ao buscar alunos", error);
-    }
-  };
-
-  const fetchCidades = async () => {
-    try {
-      const res = await fetch('/api/cidades', {
-        headers: { 'Authorization': getToken() }
-      });
-      const data = await res.json();
-      setCidades(data);
-    } catch (error) {
-      console.error("Erro ao buscar cidades", error);
-    }
-  };
-
-  const fetchCursos = async () => {
-    try {
-      const res = await fetch('/api/cursos', {
-        headers: { 'Authorization': getToken() }
-      });
-      const data = await res.json();
-      setCursos(data);
-    } catch (error) {
-      console.error("Erro ao buscar cursos", error);
-    }
-  };
 
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
